@@ -185,30 +185,44 @@ class FACE_pipeline():
 
         # parallel
         ################################################################ 
-        threads = [None] * len(batch)
-        out_img = [None] * len(batch)
-        out_pts = [None] * len(batch)
-        out_pts_raw = [None] * len(batch)
+        # threads = [None] * len(batch)
+        # out_img = [None] * len(batch)
+        # out_pts = [None] * len(batch)
+        # out_pts_raw = [None] * len(batch)
 
-        def _target(i, sample, *args, **kwargs):
-            out = self.transform(sample, *args, **kwargs)
-            out_img[i] = out[0]
-            out_pts[i] = out[1]
-            out_pts_raw[i] = out[2]
+        # def _target(i, sample, *args, **kwargs):
+            # out = self.transform(sample, *args, **kwargs)
+            # out_img[i] = out[0]
+            # out_pts[i] = out[1]
+            # out_pts_raw[i] = out[2]
 
 
-        for i, sample in enumerate(batch):
-            threads[i] = threading.Thread(
-                target=_target,
-                args=(i, sample, *args),
-                kwargs = kwargs,
-                )
-            threads[i].start()
+        # for i, sample in enumerate(batch):
+            # threads[i] = threading.Thread(
+                # target=_target,
+                # args=(i, sample, *args),
+                # kwargs = kwargs,
+                # )
+            # threads[i].start()
 
-        for t in threads:t.join()
+        # for t in threads:t.join()
 
-        out_img = np.stack(out_img)
-        out_pts = np.stack(out_pts)
-        out_pts_raw = np.stack(out_pts_raw)
+        # out_img = np.stack(out_img)
+        # out_pts = np.stack(out_pts)
+        # out_pts_raw = np.stack(out_pts_raw)
 
-        return out_img, out_pts, out_pts_raw
+        # return out_img, out_pts, out_pts_raw
+
+        # ToDo! find bug: some images show weird artefacts when using multi-threading
+        # multi-threading is deactivated and batch_transform works in serial mode
+        IMG, PTS, PTS_RAW = [], [], []
+        for img in batch:
+            img, pts, pts_raw = self.transform(img, *args, **kwargs)
+            IMG.append(img)
+            PTS.append(pts)
+            PTS_RAW.append(pts_raw)
+
+        return np.array(IMG), np.array(PTS), np.array(PTS_RAW)
+
+
+
